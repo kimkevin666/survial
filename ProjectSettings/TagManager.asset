@@ -13,9 +13,9 @@ TagManager:
   - UI
   - Player
   - ground
-  - 
-  - 
-  - 
+  - Interactable
+  - Equip
+  - Resource
   - 
   - 
   - 
