@@ -16,11 +16,10 @@ public class PlayerController : MonoBehaviour
     public float maxXLook; // 최대 시야각
     private float camCurXRot;
     public float lookSensitivity; //마우스 회전 민감도
-   
     private Vector2 mouseDelta;
+    public bool canLook = true;
     
-
-    
+    public Action inventory;
     private Rigidbody _rigidbody;
 
     private void Awake()
@@ -33,16 +32,19 @@ public class PlayerController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
     }
 
-    // Update is called once per frame
-   private void FixedUpdate()
+    
+  void FixedUpdate()
     {
         Move();
     }
 
     private void LateUpdate()
     {
-        Debug.Log("땅인가?" + IsGrounded());
-        CameraLook();
+        if (canLook)
+        {
+            // Debug.Log("땅인가?" + IsGrounded());
+            CameraLook();
+        }
     }
     void Move()
     {
@@ -58,6 +60,9 @@ public class PlayerController : MonoBehaviour
         camCurXRot += mouseDelta.y * lookSensitivity;
         camCurXRot = Mathf.Clamp(camCurXRot, minXLook, maxXLook);
         cameraContainer.localEulerAngles = new Vector3(-camCurXRot, 0, 0);
+        
+        transform.Rotate(Vector3.up * mouseDelta.x * lookSensitivity);
+        
         
         transform.eulerAngles = new Vector3(0, mouseDelta.x * lookSensitivity,0);
     }
@@ -81,7 +86,7 @@ public class PlayerController : MonoBehaviour
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        if (context.phase == InputActionPhase.Started) // && IsGrounded())
+        if (context.phase == InputActionPhase.Started && IsGrounded())
         {
             _rigidbody.AddForce(Vector2.up * jumpPower, ForceMode.Impulse);
         }
@@ -89,17 +94,18 @@ public class PlayerController : MonoBehaviour
 
     bool IsGrounded()
     {
-        Ray[] rays = new Ray[4];
+        Ray[] rays = new Ray[4]
         {
-            new Ray(transform.position + (transform.forward*0.2f)+(transform.up*0.01f), Vector3.down);
-            new Ray(transform.position + (-transform.forward*0.2f)+(transform.up*0.01f), Vector3.down);
-            new Ray(transform.position + (transform.forward*0.2f)+(transform.up*0.01f), Vector3.down);
-            new Ray(transform.position + (-transform.forward*0.2f)+(transform.up*0.01f), Vector3.down);
+            new Ray(transform.position + (transform.forward*0.2f)+(transform.up*0.01f), Vector3.down),
+            new Ray(transform.position + (-transform.forward*0.2f)+(transform.up*0.01f), Vector3.down),
+            new Ray(transform.position + (transform.forward*0.2f)+(transform.up*0.01f), Vector3.down),
+            new Ray(transform.position + (-transform.forward*0.2f)+(transform.up*0.01f), Vector3.down)
         } ;
         for (int i = 0; i < rays.Length; i++) 
         {
-            Debug.DrawRay(rays[i].origin, rays[i].direction * 100f, Color.red);
-            if (Physics.Raycast(rays[i], 20f, groundLayerMask))
+            // Debug.DrawRay(rays[i].origin, rays[i].direction * 0.5f, Color.red);
+            
+            if (Physics.Raycast(rays[i], 0.5f, groundLayerMask))
             {
                 return true;
             }
@@ -107,5 +113,23 @@ public class PlayerController : MonoBehaviour
         
         return false; //반환문
     }
+
+    public void OnInventory(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Started)
+        {
+            inventory?.Invoke();
+            ToggleCurSor();
+
+        }
+    }
+
+    void ToggleCurSor()
+    {
+        bool toggle = Cursor.lockState ==CursorLockMode.Locked;
+        Cursor.lockState = toggle ? CursorLockMode.None : CursorLockMode.Locked;
+        canLook = toggle;
+    }
 }
+
 

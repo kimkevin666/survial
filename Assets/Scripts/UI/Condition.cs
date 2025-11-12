@@ -8,21 +8,23 @@ public class Condition : MonoBehaviour
     public float maxValue;
     public float passiveValue;
     public Image uibar;
-    // Start is called before the first frame update
+  
     void Start()
     {
         curValue = startValue;
     }
 
-    // Update is called once per frame
+ 
     void Update()
     {
         // ui업데이트
-        curValue = startValue;
+        uibar.fillAmount = GetPercentage();
     }
     //계산 함수
     float GetPercentage()
     {
+       // Debug.Log(curValue + "");
+       // Debug.Log(maxValue + "");
         return curValue / maxValue;
     }
 

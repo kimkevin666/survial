@@ -9,7 +9,6 @@ public class UICondion : MonoBehaviour
     public Condition stamina;
     
     
-    // Start is called before the first frame update
     void Start()
     {
         CharacterManager.Instance.Player.condition.uicondition = this;
